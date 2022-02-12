@@ -48,7 +48,8 @@ def WhiteList(hashes):
         if r.json()['Message'] != 'Success!':
             # User message
             print(r.text)
-            break
+            return 0#"Error whitelisting the files!"
+    return 1#"Files were whitelisted successfully!"
     print(r)
 # def Ignore():
 #     #to do
