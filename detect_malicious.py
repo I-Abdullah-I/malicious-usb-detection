@@ -26,22 +26,14 @@ def generate_hashes(path, hashed_list,Py_files_pathes):
         Py_files_pathes.append(file)
     hashed_list = list(dict.fromkeys(hashed_list))    
         
-def match_hashes(malicious_hashed_path, hashed_list, fullPath, output,Py_files_pathes,Sus_files_list,sus_hashes):
-    mal_list = []
-    file = open(malicious_hashed_path, "r")
-    lines = file.readlines()
-    for line in lines:
-        mal_list.append(line)
+def match_hashes(mal_list, hashed_list, fullPath, output, Py_files_pathes, Sus_files_list, sus_hashes):
     for digest in hashed_list:
-        digest = digest + '\n'
         if digest in mal_list:
             sus_hashes.append(digest)
             Sus_files_list.append(Py_files_pathes[hashed_list.index(digest)])
-            output.append(fullPath + " ==>> MALICIOUS CODE FOUND!")
-            return
-    output.append(fullPath + " ==>> USB is safe!")
 
-def Delete(Files):
+
+def Delete_mal(Files):
     for i in Files:
         os.remove(i)
         print('{} is deleted successfully'.format(i))
