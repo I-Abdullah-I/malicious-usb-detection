@@ -40,11 +40,15 @@ def Delete_mal(Files):
     print("All malicious files were removed")
 
 def WhiteList(hashes):
-    URL = ""
-    Files= {}
+    URL = "http://localhost:9000/api/digests/whitelist"
+    # Files= {}
     for i in hashes:
-        Files ['hash {}'.format(hashes.index(i)+1)] = i
-    r = requests.post(URL,Files)
+        # Files ['hash {}'.format(hashes.index(i)+1)] = i
+        r = requests.put(URL, {'digest': i})
+        if r.json()['Message'] != 'Success!':
+            # User message
+            print(r.text)
+            break
     print(r)
 # def Ignore():
 #     #to do
@@ -85,9 +89,4 @@ def WhiteList(hashes):
 #                 WhiteList(Sus_hashes)
 #             elif UserInput == '3':
 #                 os.system('sudo eject /media/abdullah/USB\ stick')
-
-def main():
-        Detection()
-if __name__ == "__main__":
-    main()
 
