@@ -1,8 +1,6 @@
-1- create a virtual environment with python3 [3.9 recommended]
-2- install "pyudev" using pip
-3- run "detect_malicious.py" first then insert a USB stick
-4- if your stick contains none of the malicious codes previously hashed in "digests.txt" you'll get a safe message
-5- copy "malicious.py" to you USB stick
-6- eject your USB stick
-7- re-run the code again then mount the stick
-8- you'll get a malicious message
+1- run the command "python3 "malware detection GUI.py""
+2- you can add a malicious file to the database
+3- you can scan a USB by the following instructions
+	3.1 - press the scan USB button 
+	3.2 - enter the USB
+`	3.3 - if there are malicious files you have three options each one can be done by a button in the GUI
