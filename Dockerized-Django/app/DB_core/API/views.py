@@ -1,0 +1,423 @@
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+
+from DB_core.models import Malware
+from .serializers import MalwareSerializer
+
+@api_view(["GET"])
+@permission_classes(())
+def api_read_all_digests(request):
+    items = Malware.objects.all()
+    if items.count() > 0:
+        malware_serializer = MalwareSerializer(items, many=True)
+        return Response(malware_serializer.data)
+    else:
+        return Response(
+            data={ "Message": "No Items Found" }, status=status.HTTP_404_NOT_FOUND
+        )
+
+@api_view(["POST"])
+@permission_classes(())
+def api_post_digest(request):
+    digest = Malware()
+    digest_serilalizer = MalwareSerializer(digest, request.data)
+    res = {}
+    if digest_serilalizer.is_valid():
+        digest_serilalizer.save()
+        res["Message"] = "Success!"
+        return Response(data=res, status=status.HTTP_200_OK)
+    else:
+        return Response(digest_serilalizer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["PUT"])
+@permission_classes(())
+def api_whitelist_digest(request):
+    digest = Malware.objects.get(digest=request.data['digest'])
+    if digest:
+        digest.whitelisted = True
+        digest.save()
+        return Response(data={'Message': 'Success!'}, status=status.HTTP_200_OK)
+    else:
+        return Response(data={'Message': 'No digests are found!'}, status=status.HTTP_400_BAD_REQUEST)
+    # digest_serilalizer = MalwareSerializer(digest, request.data)
+    # res = {}
+    # if digest_serilalizer.is_valid():
+    #     digest_serilalizer.save()
+    #     res["Message"] = "Success!"
+    #     return Response(data=res, status=status.HTTP_200_OK)
+    # else:
+    #     return Response(digest_serilalizer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+# class ItemInStoreVendorAPI(APIView):  # Name_of_item for vendors
+#     authentication_classes = [TokenAuthentication]
+#     permission_classes = [IsAuthenticated]
+
+#     def get(self, request, name_of_item):
+#         if request.user.type != User.VENDOR:
+#             return Response(
+#                 data={"Note": "You are not a vendor"}, status=status.HTTP_404_NOT_FOUND
+#             )
+#         try:
+#             store = Store.objects.get(owner=request.user)
+#             items = Item.objects.filter(store_id=store, name=name_of_item)
+#         except (Item.DoesNotExist, Store.DoesNotExist):
+#             return Response(
+#                 data={
+#                     "Error": "There is no Items in store or There is no store with this name"
+#                 },
+#                 status=status.HTTP_404_NOT_FOUND,
+#             )
+
+#         if items.count() > 0:
+#             item_serializer = serializers.ItemSerializer(items, many=True)
+#             return Response(item_serializer.data)
+#         else:
+#             return Response(
+#                 data={"Note": "No Items Found"}, status=status.HTTP_404_NOT_FOUND
+#             )
+
+
+# class ItemInStoreEndUserAPI(APIView):  # Name_of_item / Name_of_store for EndUsers
+#     authentication_classes = [TokenAuthentication]
+#     permission_classes = [IsAuthenticated]
+
+#     def get(self, request, name_of_store, name_of_item):
+#         if request.user.type != User.ENDUSER:
+#             return Response(
+#                 data={"Note": "You are not an end user"},
+#                 status=status.HTTP_404_NOT_FOUND,
+#             )
+#         try:
+#             store = Store.objects.get(name=name_of_store)
+#             items = Item.objects.filter(store_id=store, name=name_of_item)
+#         except (Item.DoesNotExist, Store.DoesNotExist):
+#             return Response(
+#                 data={
+#                     "Error": "There is no Items in store or There is no store with this name"
+#                 },
+#                 status=status.HTTP_404_NOT_FOUND,
+#             )
+
+#         if items.count() > 0:
+#             item_serializer = serializers.ItemSerializer(items, many=True)
+#             return Response(item_serializer.data)
+#         else:
+#             return Response(
+#                 data={"Note": "No Items Found"}, status=status.HTTP_404_NOT_FOUND
+#             )
+
+
+# class ItemInStoreAPI(APIView):  # All Items in a specific store for endUser
+#     authentication_classes = [TokenAuthentication]
+#     permission_classes = [IsAuthenticated]
+
+#     def get(self, request, name_of_store):
+#         if request.user.type != User.ENDUSER:
+#             return Response(
+#                 data={"Note": "You are not an end user"},
+#                 status=status.HTTP_404_NOT_FOUND,
+#             )
+#         try:
+#             store = Store.objects.get(name=name_of_store)
+#             items = Item.objects.filter(store_id=store)
+#         except (Item.DoesNotExist, Store.DoesNotExist):
+#             return Response(
+#                 data={
+#                     "Error": "There is no Items in store or There is no store with this name"
+#                 },
+#                 status=status.HTTP_404_NOT_FOUND,
+#             )
+
+#         if items.count() > 0:
+#             item_serializer = serializers.ItemSerializer(items, many=True)
+#             return Response(item_serializer.data)
+#         else:
+#             return Response(
+#                 data={"Note": "No Items Found"}, status=status.HTTP_404_NOT_FOUND
+#             )
+
+
+# class ItemByUserAPI(APIView):  # All items in Vendor Users
+#     authentication_classes = [TokenAuthentication]
+#     permission_classes = [IsAuthenticated]
+
+#     def get(self, request):
+#         if request.user.type != User.VENDOR:
+#             return Response(
+#                 data={"Note": "You are not a vendor, Therefore You don't own a store"},
+#                 status=status.HTTP_404_NOT_FOUND,
+#             )
+#         try:
+#             store = Store.objects.get(owner=request.user)
+#             items = Item.objects.filter(store_id=store)
+#         except (Item.DoesNotExist, Store.DoesNotExist):
+#             return Response(
+#                 data={
+#                     "Error": "Your account doesnot own a store or There is no Items in store"
+#                 },
+#                 status=status.HTTP_404_NOT_FOUND,
+#             )
+
+#         if items.count() > 0:
+#             item_serializer = serializers.ItemSerializer(items, many=True)
+#             return Response(item_serializer.data)
+#         else:
+#             return Response(
+#                 data={"Note": "No Items Found"}, status=status.HTTP_404_NOT_FOUND
+#             )
+
+
+# class ItemUpdateAPI(APIView):
+#     authentication_classes = [TokenAuthentication]
+#     permission_classes = [IsAuthenticated]
+
+#     def put(self, request, name_of_item):
+#         if request.user.type != User.VENDOR:
+#             return Response(
+#                 data={"Note": "You are not a vendor, Therefore You don't own a store"},
+#                 status=status.HTTP_404_NOT_FOUND,
+#             )
+#         try:
+#             store = Store.objects.get(owner=request.user)
+
+#             item = Item.objects.get(store_id=store, name=name_of_item)
+
+#         except (Item.DoesNotExist, Store.DoesNotExist):
+#             return Response(status=status.HTTP_404_NOT_FOUND)
+
+#         item_serializer = serializers.ItemSerializer(item, data=request.data)
+#         data = {}
+#         if item_serializer.is_valid():
+#             item_serializer.save()
+#             data["update"] = "Successfully Updated"
+#             return Response(data=data, status=status.HTTP_200_OK)
+#         else:
+
+#             return Response(
+#                 data=item_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+#             )
+
+
+# class ItemUpdatebyID_API(APIView):
+#     authentication_classes = [TokenAuthentication]
+#     permission_classes = [IsAuthenticated]
+
+#     def put(self, request, item_id):
+#         if request.user.type != User.VENDOR:
+#             return Response(
+#                 data={"Note": "You are not a vendor, Therefore You don't own a store"},
+#                 status=status.HTTP_404_NOT_FOUND,
+#             )
+#         try:
+
+#             item = Item.objects.get(id=item_id)
+
+#         except (Item.DoesNotExist):
+#             return Response(status=status.HTTP_404_NOT_FOUND)
+
+#         item_serializer = serializers.ItemSerializer(item, data=request.data)
+#         data = {}
+#         if item_serializer.is_valid():
+#             item_serializer.save()
+#             data["update"] = "Successfully Updated"
+#             return Response(data=data, status=status.HTTP_200_OK)
+#         else:
+
+#             return Response(
+#                 data=item_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+#             )
+
+
+# class ItemDeleteAPI(APIView):
+#     authentication_classes = [TokenAuthentication]
+#     permission_classes = [IsAuthenticated]
+
+#     def delete(self, request, name_of_item):
+#         if request.user.type != User.VENDOR:
+#             return Response(
+#                 data={"Note": "You are not a vendor, Therefore You don't own a store"},
+#                 status=status.HTTP_404_NOT_FOUND,
+#             )
+#         try:
+#             store = Store.objects.get(owner=request.user)
+#             item = Item.objects.get(store_id=store, name=name_of_item)
+#         except (Item.DoesNotExist, Store.DoesNotExist):
+#             return Response(status=status.HTTP_404_NOT_FOUND)
+
+#         operation = item.delete()
+#         data = {}
+#         if operation:
+#             data["delete"] = "Successfully Deleted"
+#             return Response(data=data, status=status.HTTP_200_OK)
+#         else:
+#             data["delete"] = "Delete is failed"
+#             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
+
+# class ItemDeleteByID_API(APIView):
+#     authentication_classes = [TokenAuthentication]
+#     permission_classes = [IsAuthenticated]
+
+#     def delete(self, request, item_id):
+#         if request.user.type != User.VENDOR:
+#             return Response(
+#                 data={"Note": "You are not a vendor, Therefore You don't own a store"},
+#                 status=status.HTTP_404_NOT_FOUND,
+#             )
+#         try:
+#             store = Store.objects.get(owner=request.user)
+#             item = Item.objects.get(store_id=store, id=item_id)
+#         except (Item.DoesNotExist, Store.DoesNotExist):
+#             return Response(status=status.HTTP_404_NOT_FOUND)
+
+#         operation = item.delete()
+#         data = {}
+#         if operation:
+#             data["delete"] = "Successfully Deleted"
+#             return Response(data=data, status=status.HTTP_200_OK)
+#         else:
+#             data["delete"] = "Delete is failed"
+#             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
+
+# class ItemCreateAPI(APIView):
+#     authentication_classes = [TokenAuthentication]
+#     permission_classes = [IsAuthenticated]
+
+#     def post(self, request):
+#         if request.user.type != User.VENDOR:
+#             return Response(
+#                 data={"Note": "You are not a vendor, Therefore You don't own a store"},
+#                 status=status.HTTP_404_NOT_FOUND,
+#             )
+#         try:
+#             store = Store.objects.get(owner=request.user)
+#         except (Item.DoesNotExist, Store.DoesNotExist):
+#             return Response(
+#                 data={"Error": "Your Vendor account doesnot own a store"},
+#                 status=status.HTTP_404_NOT_FOUND,
+#             )
+#         item = Item(store_id=store)
+#         if int(request.data["quantity"]) < 0 or int(request.data["price"]) < 0:
+#             return Response(
+#                 data={"Error": "No Negative Numbers"},
+#                 status=status.HTTP_400_BAD_REQUEST,
+#             )
+#         item_serializer = serializers.ItemSerializer(item, data=request.data)
+
+#         data = {}
+
+#         if item_serializer.is_valid():
+#             item_serializer.save()
+#             data["Create"] = "Item is successfully created"
+#             return Response(data=data, status=status.HTTP_200_OK)
+#         else:
+#             return Response(item_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# class ItemListAPI(
+#     APIView
+# ):  # All items in system for end User , Restricted Items for Vendor
+#     authentication_classes = [TokenAuthentication]
+#     permission_classes = [IsAuthenticated]
+
+#     def get(self, request):
+#         if request.user.type == User.VENDOR:
+#             try:
+#                 store = Store.objects.get(owner=request.user)
+#                 item = Item.objects.filter(store_id=store)
+#             except (Item.DoesNotExist, Store.DoesNotExist):
+#                 return Response(
+#                     data={
+#                         "Error": "There is no Items in store or There is no store with this name"
+#                     },
+#                     status=status.HTTP_404_NOT_FOUND,
+#                 )
+#         else:
+#             try:
+#                 item = Item.objects.all()
+#             except Item.DoesNotExist:
+#                 return Response(status=status.HTTP_404_NOT_FOUND)
+
+#         item_serializer = serializers.ItemSerializer(item, many=True)
+
+#         return Response(item_serializer.data)
+
+
+# class ItemListByItemNameAPI(
+#     APIView
+# ):  # All Items in system by specific name for End Users
+#     authentication_classes = [TokenAuthentication]
+#     permission_classes = [IsAuthenticated]
+
+#     def get(self, request, name_of_item):
+#         if request.user.type != User.VENDOR:
+#             try:
+#                 items = Item.objects.filter(name=name_of_item)
+#             except Item.DoesNotExist:
+#                 return Response(status=status.HTTP_404_NOT_FOUND)
+#         else:
+#             return Response(data={"Note": "For endusers and admins only"})
+
+#         if items.count() > 0:
+#             item_serializer = serializers.ItemSerializer(items, many=True)
+#             return Response(item_serializer.data)
+#         else:
+#             return Response(
+#                 data={"Note": "No Items Found"}, status=status.HTTP_404_NOT_FOUND
+#             )
+
+
+# class ItemsDeleteAPI(APIView):
+#     authentication_classes = [TokenAuthentication]
+#     permission_classes = [IsAuthenticated]
+
+#     def delete(self, request):
+#         if request.user.type != User.VENDOR:
+#             return Response(
+#                 data={"Note": "You are not a vendor, Therefore You don't own a store"},
+#                 status=status.HTTP_404_NOT_FOUND,
+#             )
+#         try:
+#             store = Store.objects.get(owner=request.user)
+#             item = Item.objects.filter(store_id=store)
+#         except (Item.DoesNotExist, Store.DoesNotExist):
+#             return Response(
+#                 data={
+#                     "Error": "There is no Items in store or There is no store with this name"
+#                 },
+#                 status=status.HTTP_404_NOT_FOUND,
+#             )
+
+#         operation = item.delete()
+#         data = {}
+#         if operation:
+#             data["delete"] = "Successfully Deleted"
+#             return Response(data=data, status=status.HTTP_200_OK)
+#         else:
+#             data["delete"] = "Delete is failed"
+#             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
+
+# class ItemByID_API(APIView):  # Get Item by ID for vendors and endusers
+#     authentication_classes = [TokenAuthentication]
+#     permission_classes = [IsAuthenticated]
+
+#     def get(self, request, item_id):
+#         try:
+#             item = Item.objects.get(id=item_id)
+#         except (Item.DoesNotExist, Store.DoesNotExist):
+#             return Response(
+#                 data={
+#                     "Error": "There is no Items in store or There is no store with this name"
+#                 },
+#                 status=status.HTTP_404_NOT_FOUND,
+#             )
+
+#         item_serializer = serializers.ItemSerializer(item)
+#         return Response(item_serializer.data)
